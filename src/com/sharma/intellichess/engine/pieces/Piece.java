@@ -14,4 +14,9 @@ public abstract class Piece {
         this.color = color;
         this.position = position;
     }
+
+    public String getColor(){
+        return this.color;
+    }
+
 }

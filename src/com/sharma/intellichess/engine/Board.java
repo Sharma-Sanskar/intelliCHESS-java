@@ -37,10 +37,34 @@ public class Board {
         }
     }
 
+    public Piece[][] getGrid(){
+        return this.grid;
+    }
+
+
     public void displayBoard(){
-        for (int i = 0; i < 8; i++) {
-            System.out.println(8 - i);
+        for(int row = 0; row <8; row++){
+            System.out.print(8 - row+ " ");
+            for(int col = 0; col < 8; col++){
+                Piece piece = grid[row][col];
+                System.out.print(getPieceSymbol(piece));
+            }
+            System.out.println();
         }
+        System.out.println("   a   b   c   d   e   f   g   h");
+    }
+
+    public String getPieceSymbol(Piece piece){
+        if (piece == null)
+            return "[  ]";
+
+        char colorChar = piece.getColor().charAt(0);
+        char typeChar = piece.getClass().getSimpleName().charAt(0);
+        if (piece instanceof Knight){
+            typeChar = 'N';
+        }
+
+        return String.format("[%c%c]",colorChar,typeChar);
     }
 
 }
