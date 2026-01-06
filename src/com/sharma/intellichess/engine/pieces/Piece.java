@@ -7,6 +7,7 @@ import java.util.List;
 public abstract class Piece {
     protected String color;
     protected int[] position;
+    protected char name;
 
     public abstract List<int[]> getLegalMoves(Board board);
 
