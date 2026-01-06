@@ -4,8 +4,10 @@ import java.util.List;
 import com.sharma.intellichess.engine.Board;
 
 public class Knight extends Piece{
-    public Knight(String color, int[] pos){
-        super(color,pos);
+    public Knight(String color, int[] pos,char name){
+        super(color, pos);
+        this.name = 'N';
+
     }
 
     @Override

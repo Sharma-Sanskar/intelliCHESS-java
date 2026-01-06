@@ -9,15 +9,31 @@ public class Board {
         setupBoard();
     }
 
+    char[][] boardState = new char[8][8];
+    public void initBoard() {
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                boardState[i][j] = '.';
+            }
+        }
+    }
+    public void printBoard(char[][] boardState){
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                System.out.print(boardState[i][j]);
+            }
+            System.out.println();
+        }
+    }
     private void setupBoard(){
         // Place black pieces
         grid[0][0] = new Rook("black", new int[]{0, 0});
-        grid[0][1] = new Knight("black", new int[]{0, 1});
+//        grid[0][1] = new Knight("black", new int[]{0, 1});
         grid[0][2] = new Bishop("black", new int[]{0, 2});
         grid[0][3] = new Queen("black", new int[]{0, 3});
         grid[0][4] = new King("black", new int[]{0, 4});
         grid[0][5] = new Bishop("black", new int[]{0, 5});
-        grid[0][6] = new Knight("black", new int[]{0, 6});
+//        grid[0][6] = new Knight("black", new int[]{0, 6});
         grid[0][7] = new Rook("black", new int[]{0, 7});
         for (int i = 0; i < 8; i++) {
             grid[1][i] = new Pawn("black", new int[]{1, i});
@@ -25,12 +41,12 @@ public class Board {
 
         // Place white pieces
         grid[7][0] = new Rook("white", new int[]{7, 0});
-        grid[7][1] = new Knight("white", new int[]{7, 1});
+//        grid[7][1] = new Knight("white", new int[]{7, 1});
         grid[7][2] = new Bishop("white", new int[]{7, 2});
         grid[7][3] = new Queen("white", new int[]{7, 3});
         grid[7][4] = new King("white", new int[]{7, 4});
         grid[7][5] = new Bishop("white", new int[]{7, 5});
-        grid[7][6] = new Knight("white", new int[]{7, 6});
+//        grid[7][6] = new Knight("white", new int[]{7, 6});
         grid[7][7] = new Rook("white", new int[]{7, 7});
         for (int i = 0; i < 8; i++) {
             grid[6][i] = new Pawn("white", new int[]{6, i});
