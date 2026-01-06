@@ -18,11 +18,17 @@ Currently implementing the foundational Board Representation and FEN Parsing log
 
 ## ⚡ Key Features
 
-- **Robust Board Representation:** 8x8 Array-based architecture (migrating to Bitboards soon).
+- **Board Representation:** 8x8 char-based board (planned migration to Bitboards).
 - **FEN Parsing:** Full support for Forsyth–Edwards Notation (FEN) to load any game state instantly.
 - **State Management:** Tracks active color, castling rights, en passant targets, and move clocks.
 - **Clean Architecture:** Strict separation between `Engine` logic, `Pieces`, and `Board` state.
 - **Unit Tested:** Rigorous testing environment ensuring move reliability.
+
+## 📌 Current Status
+
+- IntelliChess is currently in **Phase 1: Foundation**.  
+- Core board representation and FEN parsing are implemented and stable.  
+- Move generation and rule enforcement are under active development.
 
 ## 🛠️ Tech Stack
 
@@ -41,13 +47,16 @@ Currently implementing the foundational Board Representation and FEN Parsing log
 
 1. **Clone the repository**
    ```bash
-   git clone [https://github.com/Sharma-Sanskar/intelliCHESS-java.git](https://github.com/Sharma-Sanskar/intelliCHESS-java.git)
+   git clone https://github.com/Sharma-Sanskar/intelliCHESS-java.git
    ```
 2. **Navigate to the project**
    ```bash
    cd intelliCHESS-java
    ```
-3. Run the Engine (Console Mode) Open the project in IntelliJ IDEA and run Main.java inside src/main/java/com/sharma/intellichess/engine.
+3. **Run the Engine (Console Mode)**  
+   Open the project in **IntelliJ IDEA**, navigate to:  
+   `src/main/java/com/sharma/intellichess/engine/Main.java`  
+   and run the `Main` class.
 
 ## Roadmap
 - [x] **Phase 1: Foundation**
