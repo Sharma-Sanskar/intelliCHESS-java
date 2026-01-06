@@ -1,6 +1,5 @@
 package com.sharma.intellichess.engine;
-import com.sharma.intellichess.engine.pieces.*;
-
+import  com.sharma.intellichess.engine.pieces.*;
 public class Board {
     private final Piece[][] grid;
 
