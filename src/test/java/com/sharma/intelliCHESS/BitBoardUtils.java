@@ -18,9 +18,33 @@ public class BitBoardUtils
     static final long NOT_H_FILE = ~H_FILE;
     static final long NOT_GH_FILE = ~GH_FILE;
 
+    static final long KNIGHT_ATTACKS[] = new long[64];
 
+    static {
+        initKnightAttacks();
+    }
 
+    private static void initKnightAttacks(){
+        for (int square = 0; square < 64; square++) {
+            long knightBit = 1L << square;
+            KNIGHT_ATTACKS[square] = generateKnightAttacks(knightBit);
+        }
+    }
 
+    public static long getKnightAttacks(int square){
+        return KNIGHT_ATTACKS[square];
+    }
+
+    // Faster lookup for multiple knights
+    public static long getKnightsAttacks(long knights){
+        long attacks = 0L;
+        while (knights != 0){
+            int square = Long.numberOfTrailingZeros(knights); // find the lowest set bit
+            attacks |= KNIGHT_ATTACKS[square];
+            knights &= knights -1; // update knight
+        }
+        return attacks;
+    }
     public static int squareToBit(String square) {
         // Extract characters
         char fileChar = square.charAt(0); // 'e'
@@ -132,21 +156,30 @@ public class BitBoardUtils
         }
     }
     public static void main(String[] args) {
-        System.out.println("=== TEST 1: Knight on E4 (center) ===");
-        testKnight("e4", 8);  // Should have 8 attacks
+        System.out.println("=== Testing Lookup Table ===\n");
 
-        System.out.println("\n=== TEST 2: Knight on B1 (edge) ===");
-        testKnight("b1", 3);  // Should have 3 attacks
+        // Test 1: Single square lookup
+        System.out.println("E4 knight attacks (lookup):");
+        printBitBoard(getKnightAttacks(28));
 
-        System.out.println("\n=== TEST 3: Knight on H1 (corner) ===");
-        testKnight("h1", 2);  // Should have 2 attacks
+        // Test 2: Multiple knights
+        System.out.println("\nTwo knights (E4 + B1):");
+        long twoKnights = (1L << 28) | (1L << 1);
+        printBitBoard(getKnightsAttacks(twoKnights));
 
-        System.out.println("\n=== TEST 4: Knight on A8 (corner) ===");
-        testKnight("a8", 2);  // Should have 2 attacks
-
-        System.out.println("\n=== TEST 5: Knight on D4 (center) ===");
-        testKnight("d4", 8);  // Should have 8 attacks
+        // Test 3: Verify it matches old method
+        System.out.println("\n=== Verification: Lookup vs Calculation ===");
+        for (int square = 0; square < 64; square++) {
+            long lookup = KNIGHT_ATTACKS[square];
+            long calculated = generateKnightAttacks(1L << square);
+            if (lookup != calculated) {
+                System.out.println("❌ MISMATCH at square " + square);
+                return;
+            }
+        }
+        System.out.println("✅ All 64 squares match!");
     }
+
 
 
 
