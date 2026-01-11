@@ -1,6 +1,7 @@
 # ♟️ IntelliChess
 
-> **"Chess is the drosophila of artificial intelligence."** — Alexander Kronrod
+> **"Deep Blue was not intelligent at all. It was as intelligent as your alarm clock, a very expensive one, a $10 million piece. But what these machines are good for is helping chess players recognize new play patterns and mathematics."**  
+> — Garry Kasparov (2024)
 
 A **bitboard-based chess move generator** built in Java, demonstrating high-performance move generation techniques and space-time optimization trade-offs.
 
