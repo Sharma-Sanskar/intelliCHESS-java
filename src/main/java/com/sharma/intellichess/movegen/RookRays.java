@@ -1,4 +1,5 @@
 package com.sharma.intellichess.movegen;
 
-public class King {
+public class RookRays {
+    
 }

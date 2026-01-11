@@ -34,7 +34,7 @@ public class KnightMoves {
         return attacks;
     }
 
-    public static long generateKnightAttacks(long knights) {
+    private static long generateKnightAttacks(long knights) {
         long attacks = 0L;
 
         // === Moves that go 1 file RIGHT (can't start from H-file) ===

@@ -1,4 +1,4 @@
-package com.sharma.intelliCHESS;
+package com.sharma.intellichess.demo;
 
 public class GameStateTest {
     /* Setup Game Variables */

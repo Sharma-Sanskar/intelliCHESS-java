@@ -1,6 +1,6 @@
 package com.sharma.intellichess.bitboard;
 
-public class BitBoardUtils {
+public class BitboardUtils {
     public static int squareToBit(String square) {
         // Extract characters
         char fileChar = square.charAt(0); // 'e'
@@ -23,15 +23,15 @@ public class BitBoardUtils {
 
         // Step 2: Convert to characters
         // YOUR CODE: How do you convert fileIndex (4) to 'e'?
-        char file = (char)(fileIndex + 'a');
+        char file = (char) (fileIndex + 'a');
         // YOUR CODE: How do you convert rankIndex (1) to '2'?
-        char rank = (char)(rankIndex + '1');
+        char rank = (char) (rankIndex + '1');
         // Step 3: Build and return the string
         // YOUR CODE: Combine file char + rank char into a String
         return "" + file + rank; // ""+ forces java to treat it like string
     }
 
-    public static void printBitBoard(long bitboard){
+    public static void printBitboard(long bitboard) {
 
         System.out.println("   A  B  C  D  E  F  G  H");
         for (int rank = 7; rank >= 0; rank--) {
@@ -39,17 +39,14 @@ public class BitBoardUtils {
             for (int file = 0; file < 8; file++) {
                 int square = rank * 8 + file; // calculate attack squares on each square
                 long mask = 1L << square; // flip bits on, on a new bitboard mask
-                if ((bitboard & mask) != 0){ // bitboard's position AND attack square pos
+                if ((bitboard & mask) != 0) { // bitboard's position AND attack square pos
                     System.out.print(" 1 ");
-                }
-                else {
+                } else {
                     System.out.print(" . ");
                 }
             }
             System.out.println();
         }
-
-
 
     }
 
