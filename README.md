@@ -1,6 +1,3 @@
-cd ~/Projects/intelliCHESS-java
-
-cat > README.md << 'EOF'
 # ♟️ IntelliChess
 
 > **"Chess is the drosophila of artificial intelligence."** — Alexander Kronrod
