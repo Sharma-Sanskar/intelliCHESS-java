@@ -52,8 +52,8 @@ public class PawnMoves {
 
     public static long blackDoublePush(long pawns, long emptySquares){
         long pushOnRank2 = pawns & RANK_7;
-        long singlePush = (pushOnRank2 & emptySquares) >> 8;
-        long doublePush = (singlePush & emptySquares) >> 8;
+        long singlePush = (pushOnRank2 >> 8 ) & emptySquares;
+        long doublePush = (singlePush >> 8 ) & emptySquares;
         return doublePush;
     }
 }

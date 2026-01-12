@@ -8,8 +8,9 @@ import com.sharma.intellichess.movegen.PawnMoves;
 public class Demo {
 
     public static void main(String[] args) {
-        // testKnightMoves();
+        testKnightMoves();
         testPawnMoves();
+        testKingMoves();
     }
     private static void testPawnMoves() {
     System.out.println("=== PAWN MOVE GENERATION TEST ===\n");
@@ -98,5 +99,37 @@ public class Demo {
     System.out.println(Long.bitCount(movesA4) == 4 ? "✅ PASS\n" : "❌ FAIL\n");
 }
 
-
+   private static void testKingMoves() {
+        System.out.println("=== KING MOVE GENERATION TEST ===\n");
+        
+        // Test 1: King in center (d4 = square 27)
+        System.out.println("Test 1: King on d4 (center)");
+        long kingD4 = 1L << 27;
+        long movesD4 = KingMoves.getAttacks(kingD4);
+        BitboardUtils.printBitboard(kingD4);
+        System.out.println("Moves:");
+        BitboardUtils.printBitboard(movesD4);
+        System.out.println("Expected: 8 moves | Got: " + Long.bitCount(movesD4));
+        System.out.println(Long.bitCount(movesD4) == 8 ? "✅ PASS\n" : "❌ FAIL\n");
+        
+        // Test 2: King in corner (a1 = square 0)
+        System.out.println("Test 2: King on a1 (corner)");
+        long kingA1 = 1L << 0;
+        long movesA1 = KingMoves.getAttacks(kingA1);
+        BitboardUtils.printBitboard(kingA1);
+        System.out.println("Moves:");
+        BitboardUtils.printBitboard(movesA1);
+        System.out.println("Expected: 3 moves | Got: " + Long.bitCount(movesA1));
+        System.out.println(Long.bitCount(movesA1) == 3 ? "✅ PASS\n" : "❌ FAIL\n");
+        
+        // Test 3: King on edge (e1 = square 4)
+        System.out.println("Test 3: King on e1 (edge)");
+        long kingE1 = 1L << 4;
+        long movesE1 = KingMoves.getAttacks(kingE1);
+        BitboardUtils.printBitboard(kingE1);
+        System.out.println("Moves:");
+        BitboardUtils.printBitboard(movesE1);
+        System.out.println("Expected: 5 moves | Got: " + Long.bitCount(movesE1));
+        System.out.println(Long.bitCount(movesE1) == 5 ? "✅ PASS\n" : "❌ FAIL\n");
+    }
 }

@@ -1,18 +1,23 @@
 package com.sharma.intellichess.bitboard;
 
+import com.sharma.intellichess.movegen.BishopRays;
+import com.sharma.intellichess.movegen.RookRays;
+
 public class BitboardUtils {
+
+    public static long getQueenRays(int square) {
+    return RookRays.getRay(square) | BishopRays.getRay(square);
+}
+
     public static int squareToBit(String square) {
         // Extract characters
         char fileChar = square.charAt(0); // 'e'
         char rankChar = square.charAt(1); // '2'
         int result;
         // Convert to numbers (0-7)
-        // YOUR CODE: How do you turn 'e' into 4?
         int file = fileChar - 'a';
         int rank = rankChar - '1';
-        // YOUR CODE: How do you turn '2' into 1?
         result = rank * 8 + file;
-        // YOUR CODE: Apply the formula you wrote
         return result;
     }
 
@@ -48,6 +53,23 @@ public class BitboardUtils {
             System.out.println();
         }
 
+    }
+
+    public static void printBitboard(long bitboard, char bitName) {
+        System.out.println("   A  B  C  D  E  F  G  H");
+        for (int rank = 7; rank >= 0; rank--) {
+            System.out.print(rank + 1 + " ");
+            for (int file = 0; file < 8; file++) {
+                int square = rank * 8 + file; // calculate attack squares on each square
+                long mask = 1L << square; // flip bits on, on a new bitboard mask
+                if ((bitboard & mask) != 0) { // bitboard's position AND attack square pos
+                    System.out.printf(" %c ",bitName);
+                } else {
+                    System.out.print(" . ");
+                }
+            }
+            System.out.println();
+        }
     }
 
     public static void printBitNumbers() {
