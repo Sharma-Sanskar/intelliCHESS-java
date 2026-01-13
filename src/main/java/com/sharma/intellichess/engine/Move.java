@@ -1,11 +1,6 @@
 package com.sharma.intellichess.engine;
 
-import java.util.List;
-
 import com.sharma.intellichess.bitboard.BitboardUtils;
-import com.sharma.intellichess.movegen.KingMoves;
-import com.sharma.intellichess.movegen.KnightMoves;
-
 public class Move {
     public final int sourceSquare;
     public final int targetSquare;
