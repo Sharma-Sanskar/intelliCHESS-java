@@ -14,6 +14,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class ChessGUI extends JFrame {
 
@@ -21,6 +22,7 @@ public class ChessGUI extends JFrame {
     private final JPanel boardPanel;
     private final JTextArea logArea;
     private final JLabel[] squareLabels = new JLabel[64];
+    private final EvalBar evalBar; // <--- NEW COMPONENT
 
     // Interaction State
     private int selectedSquare = -1;
@@ -37,16 +39,12 @@ public class ChessGUI extends JFrame {
     };
     private static final Color LIGHT_SQUARE = new Color(240, 217, 181);
     private static final Color DARK_SQUARE = new Color(181, 136, 99);
-    private static final Color HIGHLIGHT_COLOR = new Color(106, 176, 76); // Greenish
-    private static final Color MOVE_DEST_COLOR = new Color(106, 176, 76, 100); // Transparent Green
+    private static final Color HIGHLIGHT_COLOR = new Color(106, 176, 76); 
+    private static final Color MOVE_DEST_COLOR = new Color(106, 176, 76, 100); 
 
     public ChessGUI() {
         this.board = new Board();
-        
-        // Load Assets
         loadAssets();
-        
-        // Load Game State
         FenUtility.loadFen(board, START_FEN);
 
         setTitle("IntelliChess - Pro Dashboard");
@@ -54,12 +52,16 @@ public class ChessGUI extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        // 1. Board Panel
+        // --- LEFT: EVAL BAR ---
+        evalBar = new EvalBar();
+        add(evalBar, BorderLayout.WEST);
+
+        // --- CENTER: BOARD ---
         boardPanel = new JPanel(new GridLayout(8, 8));
         initBoardSquares();
         add(boardPanel, BorderLayout.CENTER);
 
-        // 2. Sidebar
+        // --- RIGHT: SIDEBAR ---
         JPanel sidePanel = new JPanel(new BorderLayout());
         sidePanel.setPreferredSize(new Dimension(300, 700));
         sidePanel.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -70,40 +72,108 @@ public class ChessGUI extends JFrame {
         logArea.setText("--- INTELLICHESS SYSTEM ---\nAssets Loaded: " + useImages + "\nEngine Ready.\n");
         sidePanel.add(new JScrollPane(logArea), BorderLayout.CENTER);
         
-        // Reset Button
+        // Buttons
+        JPanel buttonPanel = new JPanel(new GridLayout(2, 1, 0, 10)); 
+        
+        JButton btnAI = new JButton("COMPUTER MOVE (AI)");
+        btnAI.setFont(new Font("SansSerif", Font.BOLD, 14));
+        btnAI.setBackground(new Color(50, 50, 50));
+        btnAI.setForeground(Color.BLUE);
+        btnAI.setOpaque(true);
+        btnAI.addActionListener(e -> makeBestMove());
+        buttonPanel.add(btnAI);
+
         JButton btnReset = new JButton("RESET BOARD");
         btnReset.addActionListener(e -> {
             FenUtility.loadFen(board, START_FEN);
             selectedSquare = -1;
             legalMovesForSelectedPiece.clear();
             logArea.append(">> Board Reset.\n");
+            evalBar.updateScore(0); // Reset Bar
             refreshBoard();
         });
-        sidePanel.add(btnReset, BorderLayout.SOUTH);
+        buttonPanel.add(btnReset);
 
+        sidePanel.add(buttonPanel, BorderLayout.SOUTH);
         add(sidePanel, BorderLayout.EAST);
 
         refreshBoard();
         setVisible(true);
     }
 
+    // --- THE BRAIN (Greedy Search) ---
+    private void makeBestMove() {
+        long start = System.nanoTime();
+        List<Move> moves = MoveGenerator.generateMoves(board);
+        
+        if (moves.isEmpty()) {
+            logArea.append("GAME OVER (No moves)\n");
+            return;
+        }
+
+        Move bestMove = null;
+        int bestScore = Integer.MIN_VALUE;
+
+        for (Move move : moves) {
+            int currentScore = 0;
+            
+            // 1. Material Evaluation (Greedy Capture)
+            if (move.isCapture) {
+                int victimValue = getPieceValue(move.pieceCaptured);
+                int attackerValue = getPieceValue(move.pieceMoved);
+                // Aggressive heuristic: Gain material, risk cheap pieces
+                currentScore = victimValue - (attackerValue / 10);
+            } 
+            
+            // 2. Randomness (To avoid identical games)
+            currentScore += new Random().nextInt(10);
+
+            if (currentScore > bestScore) {
+                bestScore = currentScore;
+                bestMove = move;
+            }
+        }
+        
+        long time = System.nanoTime() - start;
+        logArea.append("AI Eval: " + bestScore + " (Time: " + (time / 1000) + "µs)\n");
+        
+        // Update Bar: Need score from White's perspective
+        // If it's White's turn, a high score means White is winning.
+        // If it's Black's turn, a high score means Black is winning (so White is losing).
+        int whitePerspectiveScore = board.whiteToMove ? bestScore : -bestScore;
+        // Scale it up for visuals if it's just small capture logic
+        evalBar.updateScore(whitePerspectiveScore * 5); 
+
+        if (bestMove != null) {
+            executeMove(bestMove);
+        }
+    }
+
+    private int getPieceValue(int piece) {
+        int type = piece % 6; 
+        switch (type) {
+            case 0: return 100;   // Pawn
+            case 1: return 320;   // Knight
+            case 2: return 330;   // Bishop
+            case 3: return 500;   // Rook
+            case 4: return 900;   // Queen
+            case 5: return 20000; // King
+            default: return 0;
+        }
+    }
+
+    // --- ASSETS & GUI LOGIC ---
     private void loadAssets() {
         String[] whiteNames = {"wP", "wN", "wB", "wR", "wQ", "wK"};
         String[] blackNames = {"bP", "bN", "bB", "bR", "bQ", "bK"};
-
         try {
             for (int i = 0; i < 6; i++) {
-                // Load White (IDs 0-5)
-                String wPath = "assets/" + whiteNames[i] + ".png";
-                pieceImages[i] = new ImageIcon(wPath).getImage().getScaledInstance(60, 60, Image.SCALE_SMOOTH);
-
-                // Load Black (IDs 6-11)
-                String bPath = "assets/" + blackNames[i] + ".png";
-                pieceImages[i + 6] = new ImageIcon(bPath).getImage().getScaledInstance(60, 60, Image.SCALE_SMOOTH);
+                pieceImages[i] = new ImageIcon("assets/" + whiteNames[i] + ".png").getImage().getScaledInstance(60, 60, Image.SCALE_SMOOTH);
+                pieceImages[i + 6] = new ImageIcon("assets/" + blackNames[i] + ".png").getImage().getScaledInstance(60, 60, Image.SCALE_SMOOTH);
             }
             useImages = true;
         } catch (Exception e) {
-            System.err.println("Could not load images. Using Unicode fallback.");
+            System.err.println("Assets not found. Using Unicode.");
             useImages = false;
         }
     }
@@ -113,16 +183,11 @@ public class ChessGUI extends JFrame {
             JLabel lbl = new JLabel("", SwingConstants.CENTER);
             lbl.setOpaque(true);
             lbl.setFont(new Font("Serif", Font.BOLD, 50));
-            
             squareLabels[i] = lbl;
             boardPanel.add(lbl);
-            
             final int visualIndex = i;
             lbl.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    handleSquareClick(visualIndex);
-                }
+                public void mouseClicked(MouseEvent e) { handleSquareClick(visualIndex); }
             });
         }
     }
@@ -130,14 +195,11 @@ public class ChessGUI extends JFrame {
     private int visualToEngine(int visualIndex) {
         int row = visualIndex / 8;
         int col = visualIndex % 8;
-        int rank = 7 - row;
-        return rank * 8 + col;
+        return (7 - row) * 8 + col;
     }
 
     private void handleSquareClick(int visualIndex) {
         int engineSquare = visualToEngine(visualIndex);
-        
-        // 1. Check if clicking a move target
         if (selectedSquare != -1) {
             for (Move m : legalMovesForSelectedPiece) {
                 if (m.targetSquare == engineSquare) {
@@ -146,20 +208,13 @@ public class ChessGUI extends JFrame {
                 }
             }
         }
-
-        // 2. Selecting a Piece
         int pieceAtSquare = board.squarePiece[engineSquare];
-        if (pieceAtSquare != Piece.NONE) {
-            boolean isWhitePiece = Piece.isWhite(pieceAtSquare);
-            if (isWhitePiece == board.whiteToMove) {
-                selectedSquare = engineSquare;
-                generateLegalMovesForSelection();
-                refreshBoard();
-                return;
-            }
+        if (pieceAtSquare != Piece.NONE && Piece.isWhite(pieceAtSquare) == board.whiteToMove) {
+            selectedSquare = engineSquare;
+            generateLegalMovesForSelection();
+            refreshBoard();
+            return;
         }
-
-        // 3. Deselect
         selectedSquare = -1;
         legalMovesForSelectedPiece.clear();
         refreshBoard();
@@ -168,33 +223,24 @@ public class ChessGUI extends JFrame {
     private void generateLegalMovesForSelection() {
         legalMovesForSelectedPiece.clear();
         List<Move> allMoves = MoveGenerator.generateMoves(board);
-        
         for (Move m : allMoves) {
-            if (m.sourceSquare == selectedSquare) {
-                legalMovesForSelectedPiece.add(m);
-            }
+            if (m.sourceSquare == selectedSquare) legalMovesForSelectedPiece.add(m);
         }
-        logArea.append("Selected " + BitboardUtils.bitToSquare(selectedSquare) + 
-                       ". Options: " + legalMovesForSelectedPiece.size() + "\n");
+        logArea.append("Selected " + BitboardUtils.bitToSquare(selectedSquare) + "\n");
     }
 
     private void executeMove(Move m) {
-        // Manual Move Update
         board.squarePiece[m.sourceSquare] = Piece.NONE;
         board.bitboards[m.pieceMoved] &= ~(1L << m.sourceSquare);
-
         if (m.isCapture) {
             board.bitboards[m.pieceCaptured] &= ~(1L << m.targetSquare);
             logArea.append(">> Capture! \n");
         }
-
         board.squarePiece[m.targetSquare] = m.pieceMoved;
         board.bitboards[m.pieceMoved] |= (1L << m.targetSquare);
-
         selectedSquare = -1;
         legalMovesForSelectedPiece.clear();
         board.whiteToMove = !board.whiteToMove;
-        
         logArea.append("Moved: " + m.toString() + "\n");
         refreshBoard();
     }
@@ -203,22 +249,13 @@ public class ChessGUI extends JFrame {
         for (int i = 0; i < 64; i++) {
             int engineSquare = visualToEngine(i);
             JLabel lbl = squareLabels[i];
-
-            // Colors
             int rank = engineSquare / 8;
             int file = engineSquare % 8;
-            boolean isLight = (rank + file) % 2 != 0;
-            lbl.setBackground(isLight ? LIGHT_SQUARE : DARK_SQUARE);
-
+            lbl.setBackground((rank + file) % 2 != 0 ? LIGHT_SQUARE : DARK_SQUARE);
             if (engineSquare == selectedSquare) lbl.setBackground(HIGHLIGHT_COLOR);
+            for (Move m : legalMovesForSelectedPiece) if (m.targetSquare == engineSquare) lbl.setBackground(MOVE_DEST_COLOR);
             
-            for (Move m : legalMovesForSelectedPiece) {
-                if (m.targetSquare == engineSquare) lbl.setBackground(MOVE_DEST_COLOR);
-            }
-
-            // Draw Piece (Image vs Unicode)
             int piece = board.squarePiece[engineSquare];
-            
             if (piece != Piece.NONE) {
                 if (useImages) {
                     lbl.setIcon(new ImageIcon(pieceImages[piece]));
@@ -235,7 +272,5 @@ public class ChessGUI extends JFrame {
         }
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(ChessGUI::new);
-    }
+    public static void main(String[] args) { SwingUtilities.invokeLater(ChessGUI::new); }
 }
