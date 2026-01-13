@@ -31,9 +31,9 @@ public class KingMoves {
         attacks |= king >> 8; // South
 
         attacks |= (king & NOT_A_FILE) << 7; // Northwest
-        attacks |= (king & NOT_A_FILE) >> 7; // Southwest
+        attacks |= (king & NOT_H_FILE) >> 7; // Southwest
         attacks |= (king & NOT_H_FILE) << 9; // Northeast
-        attacks |= (king & NOT_H_FILE) >> 9; // Southeast
+        attacks |= (king & NOT_A_FILE) >> 9; // Southeast
 
         return attacks;
 

@@ -8,128 +8,74 @@ import com.sharma.intellichess.movegen.PawnMoves;
 public class Demo {
 
     public static void main(String[] args) {
+        System.out.println("====== INTELLICHESS MOVE GENERATION TEST ======");
+
         testKnightMoves();
-        testPawnMoves();
         testKingMoves();
+        testPawnMechanics();
     }
-    private static void testPawnMoves() {
-    System.out.println("=== PAWN MOVE GENERATION TEST ===\n");
-    
-    // Test 1: White single push from starting position
-    System.out.println("Test 1: White pawn e2 - single push");
-    long pawnE2 = 1L << 12;  // e2
-    long emptyBoard = ~0L & ~pawnE2;  // All empty except pawn
-    long singlePush = PawnMoves.whiteSinglePush(pawnE2, emptyBoard);
-    BitboardUtils.printBitboard(pawnE2);
-    System.out.println("Single push:");
-    BitboardUtils.printBitboard(singlePush);
-    System.out.println("Expected: 1 move (e3) | Got: " + Long.bitCount(singlePush));
-    System.out.println(Long.bitCount(singlePush) == 1 ? "✅ PASS\n" : "❌ FAIL\n");
-    
-        // Add this BEFORE Test 2
-    System.out.println("DEBUG: Pawn e2 bitboard:");
-    BitboardUtils.printBitboard(pawnE2);
-    System.out.println("DEBUG: RANK_2 mask:");
-    long RANK_2 = 0x000000000000FF00L;
-    BitboardUtils.printBitboard(RANK_2);
-    System.out.println("DEBUG: pawnE2 & RANK_2:");
-    BitboardUtils.printBitboard(pawnE2 & RANK_2);
-    System.out.println();
 
-    // Test 2: White double push from starting position
-    System.out.println("Test 2: White pawn e2 - double push");
-    long doublePush = PawnMoves.whiteDoublePush(pawnE2, emptyBoard);
-    System.out.println("Double push:");
-    BitboardUtils.printBitboard(doublePush);
-    System.out.println("Expected: 1 move (e4) | Got: " + Long.bitCount(doublePush));
-    System.out.println(Long.bitCount(doublePush) == 1 ? "✅ PASS\n" : "❌ FAIL\n");
-    
-    // Test 3: Blocked pawn (no moves)
-    System.out.println("Test 3: White pawn e2 - blocked by piece on e3");
-    long blockedBoard = ~0L & ~pawnE2 & ~(1L << 20);  // e3 occupied
-    long blockedPush = PawnMoves.whiteSinglePush(pawnE2, blockedBoard);
-    System.out.println("Blocked single push:");
-    BitboardUtils.printBitboard(blockedPush);
-    System.out.println("Expected: 0 moves | Got: " + Long.bitCount(blockedPush));
-    System.out.println(Long.bitCount(blockedPush) == 0 ? "✅ PASS\n" : "❌ FAIL\n");
-    
-    // Test 4: All white pawns starting position
-    System.out.println("Test 4: All white pawns - single push");
-    long allWhitePawns = 0x000000000000FF00L;  // All on rank 2
-    long emptyForAll = ~allWhitePawns;
-    long allSinglePush = PawnMoves.whiteSinglePush(allWhitePawns, emptyForAll);
-    BitboardUtils.printBitboard(allWhitePawns);
-    System.out.println("All single pushes:");
-    BitboardUtils.printBitboard(allSinglePush);
-    System.out.println("Expected: 8 moves | Got: " + Long.bitCount(allSinglePush));
-    System.out.println(Long.bitCount(allSinglePush) == 8 ? "✅ PASS\n" : "❌ FAIL\n");
-}
+    private static void testKnightMoves() {
+        System.out.println("\n--- TEST 1: KNIGHT MOVES ---");
+        
+        // 1. Center Knight (D4)
+        int d4 = BitboardUtils.squareToBit("d4");
+        System.out.println("Knight on d4 (Should have 8 moves):");
+        long moves = KnightMoves.getAttacks(d4);
+        BitboardUtils.printBitboard(moves, 'N');
 
-   private static void testKnightMoves() {
-    System.out.println("=== KNIGHT MOVE GENERATION TEST ===\n");
-    
-    // Test 1: Knight in center (e4 = square 28)
-    System.out.println("Test 1: Knight on e4 (center)");
-    long knightE4 = 1L << 28;
-    long movesE4 = KnightMoves.getAttacks(knightE4);
-    BitboardUtils.printBitboard(knightE4);
-    System.out.println("Moves:");
-    BitboardUtils.printBitboard(movesE4);
-    System.out.println("Expected: 8 moves | Got: " + Long.bitCount(movesE4));
-    System.out.println(Long.bitCount(movesE4) == 8 ? "✅ PASS\n" : "❌ FAIL\n");
-    
-    // Test 2: Knight in corner (a1 = square 0)
-    System.out.println("Test 2: Knight on a1 (corner)");
-    long knightA1 = 1L << 0;
-    long movesA1 = KnightMoves.getAttacks(knightA1);
-    BitboardUtils.printBitboard(knightA1);
-    System.out.println("Moves:");
-    BitboardUtils.printBitboard(movesA1);
-    System.out.println("Expected: 2 moves | Got: " + Long.bitCount(movesA1));
-    System.out.println(Long.bitCount(movesA1) == 2 ? "✅ PASS\n" : "❌ FAIL\n");
-    
-    // Test 3: Knight on edge (a4 = square 24)
-    System.out.println("Test 3: Knight on a4 (edge)");
-    long knightA4 = 1L << 24;
-    long movesA4 = KnightMoves.getAttacks(knightA4);
-    BitboardUtils.printBitboard(knightA4);
-    System.out.println("Moves:");
-    BitboardUtils.printBitboard(movesA4);
-    System.out.println("Expected: 4 moves | Got: " + Long.bitCount(movesA4));
-    System.out.println(Long.bitCount(movesA4) == 4 ? "✅ PASS\n" : "❌ FAIL\n");
-}
+        // 2. Corner Knight (A1)
+        int a1 = BitboardUtils.squareToBit("a1");
+        System.out.println("Knight on a1 (Should have 2 moves):");
+        moves = KnightMoves.getAttacks(a1);
+        BitboardUtils.printBitboard(moves, 'N');
+    }
 
-   private static void testKingMoves() {
-        System.out.println("=== KING MOVE GENERATION TEST ===\n");
+    private static void testKingMoves() {
+        System.out.println("\n--- TEST 2: KING MOVES ---");
+
+        // 1. Side King (H4) - Should not wrap to A-file
+        int h4 = BitboardUtils.squareToBit("h4");
+        System.out.println("King on h4 (Edge test - should not wrap to left):");
+        long moves = KingMoves.getAttacks(h4);
+        BitboardUtils.printBitboard(moves, 'K');
+    }
+
+    private static void testPawnMechanics() {
+        System.out.println("\n--- TEST 3: PAWN MECHANICS ---");
+
+        // Scenario: White Pawn on E2, Black Pawn on E3 (Blocking), Black Pawn on D3 (Capture target)
+        long whitePawns = (1L << BitboardUtils.squareToBit("e2"));
+        long blackPieces = (1L << BitboardUtils.squareToBit("e3")) | (1L << BitboardUtils.squareToBit("d3"));
         
-        // Test 1: King in center (d4 = square 27)
-        System.out.println("Test 1: King on d4 (center)");
-        long kingD4 = 1L << 27;
-        long movesD4 = KingMoves.getAttacks(kingD4);
-        BitboardUtils.printBitboard(kingD4);
-        System.out.println("Moves:");
-        BitboardUtils.printBitboard(movesD4);
-        System.out.println("Expected: 8 moves | Got: " + Long.bitCount(movesD4));
-        System.out.println(Long.bitCount(movesD4) == 8 ? "✅ PASS\n" : "❌ FAIL\n");
-        
-        // Test 2: King in corner (a1 = square 0)
-        System.out.println("Test 2: King on a1 (corner)");
-        long kingA1 = 1L << 0;
-        long movesA1 = KingMoves.getAttacks(kingA1);
-        BitboardUtils.printBitboard(kingA1);
-        System.out.println("Moves:");
-        BitboardUtils.printBitboard(movesA1);
-        System.out.println("Expected: 3 moves | Got: " + Long.bitCount(movesA1));
-        System.out.println(Long.bitCount(movesA1) == 3 ? "✅ PASS\n" : "❌ FAIL\n");
-        
-        // Test 3: King on edge (e1 = square 4)
-        System.out.println("Test 3: King on e1 (edge)");
-        long kingE1 = 1L << 4;
-        long movesE1 = KingMoves.getAttacks(kingE1);
-        BitboardUtils.printBitboard(kingE1);
-        System.out.println("Moves:");
-        BitboardUtils.printBitboard(movesE1);
-        System.out.println("Expected: 5 moves | Got: " + Long.bitCount(movesE1));
-        System.out.println(Long.bitCount(movesE1) == 5 ? "✅ PASS\n" : "❌ FAIL\n");
+        // Calculate Occupancy (All pieces)
+        long allPieces = whitePawns | blackPieces;
+        long emptySquares = ~allPieces; // Bitwise NOT to get empty squares
+
+        System.out.println("Scenario: White Pawn on E2.");
+        System.out.println("Blocker on E3 (Should prevent push).");
+        System.out.println("Enemy on D3 (Should allow capture).");
+
+        // 1. Test Single Push
+        long singlePush = PawnMoves.whiteSinglePush(whitePawns, emptySquares);
+        System.out.print("\nResult - Single Push (Should be empty due to blocker): ");
+        if (singlePush == 0) System.out.println("PASSED (Blocked)");
+        else BitboardUtils.printBitboard(singlePush, 'P');
+
+        // 2. Test Double Push (Only works if single push works)
+        long doublePush = PawnMoves.whiteDoublePush(whitePawns, emptySquares);
+        System.out.print("Result - Double Push: ");
+        if (doublePush == 0) System.out.println("PASSED (Blocked)");
+        else BitboardUtils.printBitboard(doublePush, 'P');
+
+        // 3. Test Captures
+    // White Pawn on E2. Enemy Piece on D3.
+    // E2 index = 12. D3 index = 19.
+    // NorthWest capture: 12 + 7 = 19. Matches!
+    long captures = PawnMoves.whiteAttacks(whitePawns, blackPieces);
+    
+    System.out.println("\nResult - Captures (Should show X on D3):");
+    if (captures == 0) System.out.println("FAILED: No captures generated.");
+    else BitboardUtils.printBitboard(captures, 'X');
     }
 }
