@@ -27,7 +27,7 @@ public class Move {
     @Override
     public String toString() {
         // Prints "e2e4"
-        return BitboardUtils.bitToSquare(targetSquare) +
+        return BitboardUtils.bitToSquare(sourceSquare) +
                BitboardUtils.bitToSquare(targetSquare);
     }
 

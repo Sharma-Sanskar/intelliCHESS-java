@@ -3,51 +3,77 @@ package com.sharma.intellichess;
 import com.sharma.intellichess.engine.Board;
 import com.sharma.intellichess.engine.Move;
 import com.sharma.intellichess.engine.Piece;
-import com.sharma.intellichess.movegen.KingMoves;
-import com.sharma.intellichess.movegen.KnightMoves;
 import com.sharma.intellichess.movegen.MoveGenerator;
-import com.sharma.intellichess.bitboard.BitboardUtils; // Assuming you have this from before
-
 import java.util.List;
 
 public class SanityCheck {
     public static void main(String[] args) {
-        System.out.println("--- SYSTEM DIAGNOSTIC START ---");
+        System.out.println("=== TACTICAL SYSTEM CHECK ===");
 
-        // 1. Test Board Creation
         Board board = new Board();
-        System.out.println("[PASS] Board instantiated.");
-
-        // 2. Test Piece Placement (The "Bridge" Logic)
-        // Place White Rook (ID 3) on E4 (Square 28)
-        board.addPiece(28, Piece.WHITE_ROOK);
-        // Place Black King (ID 11) on E8 (Square 60)
-        board.addPiece(60, Piece.BLACK_KING);
+        board.clear();
         
-        System.out.println("[PASS] Pieces added manually.");
+        // --- SCENARIO SETUP ---
+        // 1. ROOK TEST: Friendly Fire (A1 blocked by A2)
+        board.addPiece(0, Piece.WHITE_ROOK);
+        board.addPiece(8, Piece.WHITE_KNIGHT);
+        
+        // 2. PAWN TEST: Pushes & Captures (E2 vs D3)
+        board.addPiece(12, Piece.WHITE_PAWN);
+        board.addPiece(19, Piece.BLACK_PAWN);
+        
+        // 3. KING TEST (H1)
+        board.addPiece(7, Piece.WHITE_KING);
 
-        // 3. Verify Bitboard Update
-        if ((board.bitboards[Piece.WHITE_ROOK] & (1L << 28)) != 0) {
-            System.out.println("[PASS] White Rook Bitboard updated correctly.");
-        } else {
-            System.out.println("[FAIL] Bitboard logic is broken.");
-        }
+        System.out.println("Board Setup:");
+        System.out.println(" - Rook on a1 (Blocked North by friendly Knight)");
+        System.out.println(" - Pawn on e2 (Enemy Pawn on d3)");
+        System.out.println(" - King on h1");
 
-        // 4. Verify Mailbox Update
-        if (board.squarePiece[28] == Piece.WHITE_ROOK) {
-            System.out.println("[PASS] Mailbox array updated correctly.");
-        } else {
-            System.out.println("[FAIL] Mailbox logic is broken.");
-        }
-
-        // 5. Test Move Generator Connection
-        System.out.println("Attempting to generate moves...");
+        // --- EXECUTE ---
         List<Move> moves = MoveGenerator.generateMoves(board);
-        System.out.println("[PASS] MoveGenerator ran without crashing.");
-        System.out.println("Moves found: " + moves.size() + " (Expected: 0, as logic is commented out)");
+        
+        // --- VERIFICATION ---
+        System.out.println("\nGenerated " + moves.size() + " moves. Analyzing...");
+        
+        boolean rookBlocked = true;
+        boolean pawnPushFound = false;
+        boolean pawnDoublePushFound = false;
+        boolean pawnCaptureFound = false;
 
-        System.out.println("--- SYSTEM GREEN. GO TO SLEEP. ---");
+        for (Move m : moves) {
+            String moveStr = m.toString(); // <--- THIS WAS MISSING
+            System.out.println(" > " + moveStr); 
+            
+            // Rook Logic Check
+            if (m.pieceMoved == Piece.WHITE_ROOK) {
+                if (m.targetSquare == 8 || m.targetSquare == 16) {
+                    System.out.println("❌ FAIL: Rook moved through friendly blocker! (" + moveStr + ")");
+                    rookBlocked = false;
+                }
+            }
+            
+            // Pawn Logic Check
+            if (m.pieceMoved == Piece.WHITE_PAWN) {
+                if (moveStr.equals("e2e3")) pawnPushFound = true;
+                if (moveStr.equals("e2e4")) pawnDoublePushFound = true;
+                if (moveStr.equals("e2d3")) {
+                    System.out.println("✅ PAWN CAPTURE FOUND: " + moveStr);
+                    pawnCaptureFound = true;
+                }
+            }
+        }
+
+        System.out.println("\n--- FINAL REPORT ---");
+        if (rookBlocked) System.out.println("✅ ROOK: Respects friendly blockers.");
+        if (pawnPushFound) System.out.println("✅ PAWN: Single push working.");
+        if (pawnDoublePushFound) System.out.println("✅ PAWN: Double push working.");
+        if (pawnCaptureFound) System.out.println("✅ PAWN: Diagonal capture working.");
+        
+        if (rookBlocked && pawnPushFound && pawnDoublePushFound && pawnCaptureFound) {
+            System.out.println("\n🎉 SYSTEM ALL GREEN. ENGINE IS LOGICALLY SOUND.");
+        } else {
+            System.out.println("\n⚠️ SYSTEM FAILURE. CHECK LOGS ABOVE.");
+        }
     }
-
-    
 }
