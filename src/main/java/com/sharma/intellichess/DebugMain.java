@@ -1,7 +1,6 @@
 package com.sharma.intellichess;
 
 import com.sharma.intellichess.bitboard.BitboardUtils;
-import com.sharma.intellichess.bitboard.Masks;
 import com.sharma.intellichess.movegen.*;
 
 public class DebugMain {

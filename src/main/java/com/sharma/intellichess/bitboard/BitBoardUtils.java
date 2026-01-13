@@ -4,7 +4,13 @@ import com.sharma.intellichess.movegen.BishopRays;
 import com.sharma.intellichess.movegen.RookRays;
 
 public class BitboardUtils {
+    // File Masks (to prevent wrapping around the board)
+    public static final long FILE_A = 0x0101010101010101L;
+    public static final long FILE_H = 0x8080808080808080L;
 
+    // Rank Masks (for double pushes)
+    public static final long RANK_3 = 0x0000000000FF0000L;
+    public static final long RANK_6 = 0x0000FF0000000000L;
     // --- 1. COORDINATE CONVERTERS ---
 
     /**

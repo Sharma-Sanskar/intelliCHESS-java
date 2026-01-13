@@ -67,12 +67,6 @@ public class PawnMoves {
     public static long whiteAttacks(long pawns, long blackPieces) {
         // 1. Capture Left (NorthWest): Shift up 8, left 1 (+7)
         // Must mask out File H (because moving "Left" from File A is impossible, 
-        // but the shift logic handles the wrap. Wait, actually:
-        // NorthWest (+7) from File A wraps to H? No.
-        // 56 (A8) -> 63 (H8). Correct.
-        // We actually need to prevent capturing FROM the A-File going "Left" (which wraps to H).
-        // The shift +7 moves a bit from index 0 (A1) to 7 (H1). That is a WRAP.
-        // So we must Mask NOT_A_FILE.
         
         long leftCaptures = (pawns & Masks.NOT_A_FILE) << 7;
         
