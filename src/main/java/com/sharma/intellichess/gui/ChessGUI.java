@@ -251,10 +251,29 @@ public class ChessGUI extends JFrame {
             JLabel lbl = squareLabels[i];
             int rank = engineSquare / 8;
             int file = engineSquare % 8;
-            lbl.setBackground((rank + file) % 2 != 0 ? LIGHT_SQUARE : DARK_SQUARE);
-            if (engineSquare == selectedSquare) lbl.setBackground(HIGHLIGHT_COLOR);
-            for (Move m : legalMovesForSelectedPiece) if (m.targetSquare == engineSquare) lbl.setBackground(MOVE_DEST_COLOR);
-            
+
+            // 1. Calculate the BASE Wood Color
+            Color baseColor = (rank + file) % 2 != 0 ? LIGHT_SQUARE : DARK_SQUARE;
+            Color finalColor = baseColor;
+
+            // 2. Apply Highlights (Mathematically blended, NOT transparent)
+            if (engineSquare == selectedSquare) {
+                finalColor = HIGHLIGHT_COLOR; // This is the solid Green (Source)
+            } else {
+                // Check if this square is a legal move
+                for (Move m : legalMovesForSelectedPiece) {
+                    if (m.targetSquare == engineSquare) {
+                        // Mix the Wood + Transparent Green to get a Solid Result
+                        finalColor = blendColors(baseColor, MOVE_DEST_COLOR); 
+                        break;
+                    }
+                }
+            }
+
+            // 3. Set the SOLID background (Fixes the Ghost Images)
+            lbl.setBackground(finalColor);
+
+            // 4. Draw the Piece Icon
             int piece = board.squarePiece[engineSquare];
             if (piece != Piece.NONE) {
                 if (useImages) {
@@ -271,6 +290,13 @@ public class ChessGUI extends JFrame {
             }
         }
     }
-
+    // Helper: Mixes a transparent color onto a base color to create a SOLID color
+    private Color blendColors(Color base, Color overlay) {
+        float alpha = overlay.getAlpha() / 255f;
+        int r = (int) (overlay.getRed() * alpha + base.getRed() * (1 - alpha));
+        int g = (int) (overlay.getGreen() * alpha + base.getGreen() * (1 - alpha));
+        int b = (int) (overlay.getBlue() * alpha + base.getBlue() * (1 - alpha));
+        return new Color(r, g, b); // Returns a solid (Opaque) color
+    }
     public static void main(String[] args) { SwingUtilities.invokeLater(ChessGUI::new); }
 }
