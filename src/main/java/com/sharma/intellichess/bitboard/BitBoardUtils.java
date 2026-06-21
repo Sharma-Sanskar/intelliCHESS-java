@@ -19,10 +19,10 @@ public class BitboardUtils {
     public static int squareToBit(String square) {
         char fileChar = square.charAt(0); // 'e'
         char rankChar = square.charAt(1); // '4'
-        
+
         int file = fileChar - 'a';
         int rank = rankChar - '1';
-        
+
         return rank * 8 + file;
     }
 
@@ -59,10 +59,10 @@ public class BitboardUtils {
      */
     public static void printBitboard(long bitboard, char symbol) {
         System.out.println("   A  B  C  D  E  F  G  H");
-        
+
         for (int rank = 7; rank >= 0; rank--) {
             System.out.printf("%d ", rank + 1); // Print Rank Number (Left)
-            
+
             for (int file = 0; file < 8; file++) {
                 int square = rank * 8 + file;
                 long mask = 1L << square;
@@ -83,7 +83,7 @@ public class BitboardUtils {
      */
     public static void printBitNumbers() {
         System.out.println("   A   B   C   D   E   F   G   H");
-        
+
         for (int rank = 7; rank >= 0; rank--) {
             System.out.printf("%d ", rank + 1);
             for (int file = 0; file < 8; file++) {
