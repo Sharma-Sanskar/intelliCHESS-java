@@ -1,9 +1,9 @@
 # ♟️ IntelliChess
 
-> **"Deep Blue was not intelligent at all. It was as intelligent as your alarm clock, a very expensive one, a $10 million piece. But what these machines are good for is helping chess players recognize new play patterns and mathematics."**  
+> **"Deep Blue was not intelligent at all. It was as intelligent as your alarm clock, a very expensive one, a $10 million piece. But what these machines are good for is helping chess players recognize new play patterns and mathematics."**
 > — Garry Kasparov (2024)
 
-A **bitboard-based chess move generator** built in Java, demonstrating high-performance move generation techniques and space-time optimization trade-offs.
+A **bitboard-based chess engine** built in Java from scratch, with a Swing GUI and basic AI move selection.
 
 ![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)
@@ -12,24 +12,29 @@ A **bitboard-based chess move generator** built in Java, demonstrating high-perf
 
 ## 🎯 Project Scope
 
-**This is a research project** (MCA Minor Project, Due: Jan 31, 2026) focused on:
+This started as an **MCA Minor Project** focused on bitboard move generation, and grew into a full playable engine with a GUI.
 
-1. **Bitboard move generation** for 4 piece types
-2. **Performance benchmarking**: Lookup tables vs real-time calculation
-3. **Technical documentation** of optimization techniques
-
-**NOT building:** Full chess game, AI opponent, or GUI
+**Core focus:**
+1. Bitboard move generation for all 6 piece types
+2. High-performance move generation via lookup tables and ray-based sliding attacks
+3. A playable engine with board rendering and basic AI move selection
 
 ---
 
 ## ✅ Implemented Features
 
-| Piece | Method | Status |
-|-------|--------|--------|
-| **Knight** | Precomputed lookup table | ✅ Complete |
-| **King** | Precomputed lookup table | ✅ Complete |
-| **Pawn** | Bitwise shift operations | ✅ Complete |
-| **Rook** | Ray-based sliding attacks | 🚧 In Progress |
+| Component | Method | Status |
+|---|---|---|
+| **Knight moves** | Precomputed lookup table | ✅ Complete |
+| **King moves** | Precomputed lookup table | ✅ Complete |
+| **Pawn moves** | Bitwise shift operations (single/double push) | ✅ Complete |
+| **Rook / Bishop / Queen** | Ray-based sliding attacks with shadow casting | ✅ Complete |
+| **FEN parsing** | `FenUtility` — load any board position | ✅ Complete |
+| **Check detection** | Built into move generation/validation | ✅ Complete |
+| **Move generation correctness** | Verified via sanity-check test suite, all pieces | ✅ Complete |
+| **GUI** | Java Swing, board rendering + eval bar | ✅ Complete |
+| **AI move selection** | Depth-1 (greedy) evaluation function | ✅ Complete |
+| **Minimax + Alpha-Beta search** | Multi-ply lookahead for real search-based play | 🚧 Planned |
 
 ---
 
@@ -38,73 +43,91 @@ A **bitboard-based chess move generator** built in Java, demonstrating high-perf
 ### Bitboard Representation
 - Each piece type stored as a 64-bit `long`
 - Each bit represents a square on the 8×8 board
-- Parallel processing: operate on all pieces simultaneously
+- Enables fast, parallel bitwise operations across all pieces of a type simultaneously
 
-### Optimization Techniques
-- **Lookup Tables**: O(1) move generation for Knights/Kings
-- **Ray Tables**: Precomputed directional rays for Rooks
-- **Bitwise Operations**: Shift, AND, OR for move filtering
+### Move Generation
+- **Lookup Tables**: O(1) move generation for Knights and Kings
+- **Ray Tables + Shadow Casting**: Precomputed directional rays with blocker detection for sliding pieces (Rook, Bishop, Queen)
+- **Bitwise Operations**: Shift, AND, OR, XOR for move filtering and board updates
+
+### AI / Evaluation
+- Current move selection uses a **depth-1 evaluation function** (scores the resulting position directly, no opponent lookahead) — effectively a greedy heuristic-based move picker, not a full search tree yet.
+- Minimax with alpha-beta pruning is the planned next step to enable genuine multi-ply lookahead.
 
 ---
 
-## 🚀 Running the Demo
+## 🚀 Running It
 
 ```bash
-# Compile all source files
-javac -d out src/main/java/com/sharma/intellichess/**/*.java
-
-# Run comprehensive tests
-java -cp out com.sharma.intellichess.demo.Demo
+# Run the pre-built executable JAR
+java -jar intelliCHESS.jar
 ```
 
-## Expected Output
+Or build from source:
+
 ```bash
-=== KNIGHT MOVE GENERATION TEST ===
-Test 1: Knight on e4 (center) - ✅ PASS
-Test 2: Knight on a1 (corner) - ✅ PASS
-Test 3: Knight on a4 (edge) - ✅ PASS
-
-=== KING MOVE GENERATION TEST ===
-...
+mvn clean package
+java -jar target/intelliCHESS-java-<version>.jar
 ```
 
-## Project Structure
+---
+
+## 📁 Project Structure
+
 ```
 intelliCHESS-java/
 ├── src/main/java/com/sharma/intellichess/
 │   ├── bitboard/
-│   │   ├── BitboardUtils.java    # Square conversion, visualization
-│   │   └── Masks.java             # File/rank masks for edge detection
+│   │   ├── BitboardUtils.java     # Square conversion, visualization
+│   │   ├── Masks.java             # File/rank masks for edge detection
+│   │   └── FenUtility.java        # FEN parsing → bitboard state
 │   ├── movegen/
-│   │   ├── KnightMoves.java      # Precomputed knight attacks
-│   │   ├── KingMoves.java        # Precomputed king attacks
-│   │   ├── PawnMoves.java        # Single/double push logic
-│   │   └── RookRays.java         # Ray generation (in progress)
+│   │   ├── KnightMoves.java       # Precomputed knight attacks
+│   │   ├── KingMoves.java         # Precomputed king attacks
+│   │   ├── PawnMoves.java         # Single/double push logic
+│   │   └── SliderAttacks.java     # Ray-based sliding attacks (Rook/Bishop/Queen)
+│   ├── engine/
+│   │   └── MoveGenerator.java     # Core move generation + validation
+│   ├── ai/
+│   │   └── Evaluator.java         # Depth-1 evaluation function
+│   ├── gui/
+│   │   └── ChessGUI.java          # Swing-based board UI + eval bar
 │   └── demo/
 │       └── Demo.java              # Test suite
 ```
 
-## 📊 Next Steps
- - Complete Rook ray attack generation
- - Implement benchmark framework
- - Run performance tests (10M iterations)
- - Document results in research paper
- - Create presentation slides
+*(Adjust file/class names above to match your actual source tree before committing — written from commit history, not a live directory listing.)*
+
+---
+
+## 📊 Roadmap
+
+- [ ] Implement minimax with alpha-beta pruning for real search depth
+- [ ] Add iterative deepening / time-based search cutoff
+- [ ] Benchmark move generation performance (target: 10M+ iterations)
+- [ ] Improve evaluation function (piece-square tables, mobility, king safety)
+- [ ] Write up technical documentation / research notes
+
+---
 
 ## 🛠️ Tech Stack
- - Language: Java 21 (OpenJDK)
- - Platform: macOS (M4 Mac Mini)
- - Paradigm: Pure bitboard operations, no external libraries
- - Testing: Manual test cases with visual output
+
+- **Language:** Java 21 (OpenJDK)
+- **Build:** Maven
+- **Platform tested:** macOS (M4 Mac Mini)
+- **Core engine:** Pure bitboard operations, no external libraries
+- **GUI:** Java Swing
+
+---
 
 ## 📄 License
-MIT License - see LICENSE file
+
+MIT License — see [LICENSE](LICENSE)
 
 ## 👨‍💻 Author
-Sanskar Sharma
-MCA 3rd Semester | Aspiring Project Manager  
-GitHub: @Sharma-Sanskar
 
-Built with ☕ and bitwise operations  
-EOF
+**Sanskar Sharma**
+MCA Scholar | Research Intern, IIIT Naya Raipur
+GitHub: [@Sharma-Sanskar](https://github.com/Sharma-Sanskar)
 
+Built with ☕ and bitwise operations.
